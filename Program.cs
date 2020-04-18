@@ -13,6 +13,7 @@ namespace SolarBattMan
     {
         const string SolarSensorSid = "793983";
         const string UsageSensorSid = "833355";
+        const int SolarCorrection = -48;
 
         private static readonly HttpClient client = new HttpClient();
 
@@ -25,9 +26,14 @@ namespace SolarBattMan
                 var solarSensor = sensors.Where(s => s.Sid == SolarSensorSid).FirstOrDefault();
                 var usageSensor = sensors.Where(s => s.Sid == UsageSensorSid).FirstOrDefault();
 
-                var solarExcess = solarSensor.Value - usageSensor.Value;
+                var solarExcess = solarSensor.Value - usageSensor.Value + SolarCorrection;
                 var sign = solarExcess < 0 ? "" : "+";
-                var msg = string.Format("{0}{1}W", sign, solarExcess);
+
+                var msg = string.Format("Solar: {0}W  Usage: {1}W  Solar Excess: {2}{3}W",
+                    solarSensor.Value + SolarCorrection,
+                    usageSensor.Value,
+                    sign,
+                    solarExcess);
 
                 Console.WriteLine(msg);
                 Thread.Sleep(10000);
