@@ -8,7 +8,8 @@ SOLAR_SENSOR_SID = "793983"
 USAGE_SENSOR_SID = "833355"
 SOLAR_CORRECTION = -48
 
-c = output.ConsoleOutput()
+#c = output.ConsoleOutput()
+c = output.GpioOutput()
 
 while True:
     with urlopen(MONITOR_URL) as response:

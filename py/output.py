@@ -44,6 +44,7 @@ class GpioOutput(Output):
     def __init__(self):
         super(GpioOutput, self).__init__("GPIO Output")
         print(self.name)
+        print("Setup GPIO ...")
         GPIO.setwarnings(False)  # Ignore warning for now
         GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
         GPIO.setup(11, GPIO.OUT, initial=GPIO.LOW)
@@ -52,6 +53,6 @@ class GpioOutput(Output):
 
     def set_sensor_values(self, solar, usage):
         super().set_sensor_values(solar, usage)
-        GPIO.output(11, GPIO.HIGH if elf._activity_state = ActivityState.CHARGING else GPIO.LOW) 
-        GPIO.output(13, GPIO.HIGH if elf._activity_state = ActivityState.POWERING else GPIO.LOW) 
-        GPIO.output(15, GPIO.HIGH if elf._activity_state = ActivityState.IDLE else GPIO.LOW) 
+        GPIO.output(11, GPIO.HIGH if self._activity_state == ActivityState.CHARGING else GPIO.LOW) 
+        GPIO.output(13, GPIO.HIGH if self._activity_state == ActivityState.POWERING else GPIO.LOW) 
+        GPIO.output(16, GPIO.HIGH if self._activity_state == ActivityState.IDLE else GPIO.LOW) 
