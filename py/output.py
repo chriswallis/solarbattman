@@ -25,7 +25,7 @@ OVER_USAGE_HEADROOM = 100
 
 
 
-ActivityState = {'IDLE':0, "CHRGING":1, "POWERING":2}
+ActivityState = {'IDLE':0, "CHARGING":1, "POWERING":2}
 
 
 class Output:
@@ -67,13 +67,14 @@ class GpioOutput(Output):
         GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
         GPIO.setup(11, GPIO.OUT, initial=GPIO.LOW)
         GPIO.setup(13, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.setup(16, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(15, GPIO.OUT, initial=GPIO.LOW)
 
     def set_sensor_values(self, solar, usage):
         super().set_sensor_values(solar, usage)
+        print(self._activity_state)
         GPIO.output(11, GPIO.HIGH if self._activity_state == ActivityState["CHARGING"] else GPIO.LOW) 
-        GPIO.output(13, GPIO.HIGH if self._activity_state == ActivityState["POWERING"] else GPIO.LOW) 
-        GPIO.output(16, GPIO.HIGH if self._activity_state == ActivityState["IDLE"] else GPIO.LOW) 
+        GPIO.output(13, GPIO.HIGH if self._activity_state == ActivityState["IDLE"] else GPIO.LOW) 
+        GPIO.output(15, GPIO.HIGH if self._activity_state == ActivityState["POWERING"] else GPIO.LOW) 
 
 
 
