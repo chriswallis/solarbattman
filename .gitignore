@@ -198,3 +198,6 @@ FakesAssemblies/
 # Mac things
 .DS_Store
 ._*
+
+# Py things
+__pycache__
