@@ -70,5 +70,6 @@ class GpioOutput(Output):
         print(f'Charge next: {self.doCharge}')
 
         GPIO.output(CHARGER_CONTROL_PIN, GPIO.LOW if self.doCharge else GPIO.HIGH)
+        sleep(5)
         GPIO.output(SCRIPT_RUNNING_PIN, GPIO.LOW)
 
