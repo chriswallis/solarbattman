@@ -11,20 +11,20 @@ SOLAR_CORRECTION = -48
 #c = output.ConsoleOutput()
 c = output.GpioOutput()
 
-while True:
-    with urlopen(MONITOR_URL) as response:
-        sensorJson = response.read()
+#while True:
+with urlopen(MONITOR_URL) as response:
+    sensorJson = response.read()
 
-    sensors = json.loads(sensorJson)
+sensors = json.loads(sensorJson)
 
-    for s in sensors:
-        dataElement = s["data"][0]
-        for key in dataElement:
-            if s["sid"] == SOLAR_SENSOR_SID:
-                solarNow = dataElement[key] + SOLAR_CORRECTION
-            elif s["sid"] == USAGE_SENSOR_SID:
-                usageNow = dataElement[key]
+for s in sensors:
+    dataElement = s["data"][0]
+    for key in dataElement:
+        if s["sid"] == SOLAR_SENSOR_SID:
+            solarNow = dataElement[key] + SOLAR_CORRECTION
+        elif s["sid"] == USAGE_SENSOR_SID:
+            usageNow = dataElement[key]
     
-    c.set_sensor_values(solarNow, usageNow)
+c.set_sensor_values(solarNow, usageNow)
 
-    sleep(10)
+#    sleep(10)

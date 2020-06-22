@@ -18,17 +18,14 @@ except ModuleNotFoundError as e:
             print(f'setup {pin}, {direction}, {initial}')
         def output(self, pin, level):
             print(f'output {pin}, {level}')
-            
+        def input(self, pin):
+            print(f'input {pin}')
+
     GPIO = GPIO_class()
     print(e)
 
-SOLAR_CHARGE_HEADROOM = 200
-OVER_USAGE_HEADROOM = 100
-
-
-
-ActivityState = {'IDLE':0, "CHARGING":1, "POWERING":2}
-
+CHARGER_MAX_POWER = 500
+CHARGER_CONTROL_PIN = 11
 
 class Output:
     
@@ -36,20 +33,17 @@ class Output:
         self.name = name
 
     def set_sensor_values(self, solar, usage):
-        doCharge = (solar - usage) > SOLAR_CHARGE_HEADROOM
-        doPower = (usage - solar) > OVER_USAGE_HEADROOM
-        doNothing = not doCharge and not doPower
+        self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.LOW
 
-        if doNothing:
-            self._activity_state = ActivityState["IDLE"]
+        correctedUsage = usage
 
-        if doCharge:
-            self._activity_state = ActivityState["CHARGING"]
+        # Remove assumed charger usage from usage
+        if self.charging:
+            correctedUsage -= CHARGER_MAX_POWER
 
-        if doPower:
-            self._activity_state = ActivityState["POWERING"]
+        self.doCharge = (solar - correctedUsage) > CHARGER_MAX_POWER
 
-        print("Solar: {solar}W  Usage: {fish}W".format(solar=solar, fish=usage))
+        print(f'Solar: {solar}W  Usage: {usage}W  Corrected Usage: {correctedUsage}W')
 
 
 class ConsoleOutput(Output):
@@ -67,31 +61,11 @@ class GpioOutput(Output):
         print("Setup GPIO ...")
         GPIO.setwarnings(False)  # Ignore warning for now
         GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
-        GPIO.setup(11, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup(13, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup(16, GPIO.OUT, initial=GPIO.HIGH)
-        # Flash the LEDs to say we're up and working
-        sleep(0.5)
-        GPIO.output(11, GPIO.LOW)
-        GPIO.output(13, GPIO.LOW)
-        GPIO.output(16, GPIO.LOW)
-        sleep(0.5)
-        GPIO.output(11, GPIO.HIGH)
-        GPIO.output(13, GPIO.HIGH)
-        GPIO.output(16, GPIO.HIGH)
-        sleep(0.5)
-        GPIO.output(11, GPIO.LOW)
-        GPIO.output(13, GPIO.LOW)
-        GPIO.output(16, GPIO.LOW)
+        GPIO.setup(CHARGER_CONTROL_PIN, GPIO.OUT)
 
     def set_sensor_values(self, solar, usage):
         super().set_sensor_values(solar, usage)
-        print(self._activity_state)
+        print(f'Charging now: {self.charging}')
+        print(f'Charge next: {self.doCharge}')
 
-        GPIO.output(11, GPIO.LOW)
-        GPIO.output(13, GPIO.LOW)
-        GPIO.output(16, GPIO.LOW)
-        sleep(0.1)
-        GPIO.output(11, GPIO.HIGH if self._activity_state == ActivityState["CHARGING"] else GPIO.LOW) 
-        GPIO.output(13, GPIO.HIGH if self._activity_state == ActivityState["IDLE"] else GPIO.LOW) 
-        GPIO.output(16, GPIO.HIGH if self._activity_state == ActivityState["POWERING"] else GPIO.LOW) 
+        GPIO.output(CHARGER_CONTROL_PIN, GPIO.LOW if self.doCharge else GPIO.HIGH) 
