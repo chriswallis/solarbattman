@@ -37,8 +37,8 @@ class Output:
 
     def set_sensor_values(self, solar, usage):
 
-        # Find out whether the charge pin is already low (ON)
-        self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.LOW
+        # Find out whether the charge pin is already high (ON)
+        self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.HIGH
 
         correctedUsage = usage
 
@@ -48,7 +48,7 @@ class Output:
 
         self.doCharge = (solar - correctedUsage) > CHARGER_MAX_POWER
 
-        print(f'Solar: {solar}W  Usage: {usage}W  Corrected Usage: {correctedUsage}W')
+        print(f'Solar: {solar}W  Usage: {usage}W  Usage without charger: {correctedUsage}W')
 
 
 class GpioOutput(Output):
@@ -69,7 +69,7 @@ class GpioOutput(Output):
         print(f'Charging now: {self.charging}')
         print(f'Charge next: {self.doCharge}')
 
-        GPIO.output(CHARGER_CONTROL_PIN, GPIO.LOW if self.doCharge else GPIO.HIGH)
+        GPIO.output(CHARGER_CONTROL_PIN, GPIO.HIGH if self.doCharge else GPIO.LOW)
         sleep(5)
         GPIO.output(SCRIPT_RUNNING_PIN, GPIO.LOW)
 
