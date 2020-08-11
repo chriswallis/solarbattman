@@ -1,3 +1,4 @@
+import logging
 import output   
 import json
 from time import sleep 
@@ -7,6 +8,8 @@ MONITOR_URL = "http://www.energyhive.com/mobile_proxy/getCurrentValuesSummary?to
 SOLAR_SENSOR_SID = "793983"
 USAGE_SENSOR_SID = "833355"
 SOLAR_CORRECTION = -48
+
+logging.basicConfig(filename='output.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 c = output.GpioOutput()
 

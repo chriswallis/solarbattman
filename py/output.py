@@ -1,3 +1,4 @@
+import logging
 from time import sleep
 
 try:
@@ -70,6 +71,9 @@ class GpioOutput(Output):
         print(f'Charge next: {self.doCharge}')
 
         GPIO.output(CHARGER_CONTROL_PIN, GPIO.HIGH if self.doCharge else GPIO.LOW)
+        
+        logging.debug(',%s,%s,%s,%s', solar ,usage, 1 if self.charging else 0, 1 if self.doCharge else 0)
+
         sleep(5)
         GPIO.output(SCRIPT_RUNNING_PIN, GPIO.LOW)
 
