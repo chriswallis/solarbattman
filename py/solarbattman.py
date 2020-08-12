@@ -7,7 +7,7 @@ from urllib.request import urlopen
 MONITOR_URL = "http://www.energyhive.com/mobile_proxy/getCurrentValuesSummary?token=3TAoBW0SidCO90NH3K8rDKP1FVJmhWQB"
 SOLAR_SENSOR_SID = "793983"
 USAGE_SENSOR_SID = "833355"
-SOLAR_CORRECTION = -48
+SOLAR_CORRECTION = -52
 
 logging.basicConfig(filename='output.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
