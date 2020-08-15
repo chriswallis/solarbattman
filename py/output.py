@@ -25,7 +25,7 @@ except ModuleNotFoundError as e:
     GPIO = GPIO_class()
     print(e)
 
-CHARGER_MAX_POWER = 600
+CHARGER_MAX_POWER = 250
 SCRIPT_RUNNING_PIN = 18
 CHARGER_CONTROL_PIN = 11
 OTHER_PIN_1 = 13
@@ -41,15 +41,12 @@ class Output:
         # Find out whether the charge pin is already high (ON)
         self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.HIGH
 
-        correctedUsage = usage
-
-        # Remove assumed charger usage from usage
         if self.charging:
-            correctedUsage -= CHARGER_MAX_POWER
+            self.doCharge = solar > usage
+        else:
+            self.doCharge = (solar - usage) > CHARGER_MAX_POWER
 
-        self.doCharge = (solar - correctedUsage) > CHARGER_MAX_POWER
-
-        print(f'Solar: {solar}W  Usage: {usage}W  Usage without charger: {correctedUsage}W')
+        print(f'Solar: {solar}W  Usage: {usage}W  Charging: {self.charging}  Charge now: {self.doCharge}')
 
 
 class GpioOutput(Output):
@@ -67,8 +64,6 @@ class GpioOutput(Output):
 
     def set_sensor_values(self, solar, usage):
         super().set_sensor_values(solar, usage)
-        print(f'Charging now: {self.charging}')
-        print(f'Charge next: {self.doCharge}')
 
         GPIO.output(CHARGER_CONTROL_PIN, GPIO.HIGH if self.doCharge else GPIO.LOW)
         
