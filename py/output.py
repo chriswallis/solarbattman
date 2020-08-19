@@ -25,11 +25,13 @@ except ModuleNotFoundError as e:
     GPIO = GPIO_class()
     print(e)
 
-CHARGER_MAX_POWER = 250
+CHARGER_MAX_POWER = 320
+CHARGER_STAY_ON_HEADROOM = 80
 SCRIPT_RUNNING_PIN = 18
 CHARGER_CONTROL_PIN = 11
 OTHER_PIN_1 = 13
 OTHER_PIN_2 = 15
+ERROR = -1
 
 class Output:
     
@@ -41,10 +43,15 @@ class Output:
         # Find out whether the charge pin is already high (ON)
         self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.HIGH
 
-        if self.charging:
-            self.doCharge = solar > usage
+        # Calculate current solar excess
+        solarExcess = solar - usage
+
+        if solar == ERROR or usage == ERROR:
+            self.doCharge = self.charging
+        elif self.charging:
+            self.doCharge = solarExcess > CHARGER_STAY_ON_HEADROOM
         else:
-            self.doCharge = (solar - usage) > CHARGER_MAX_POWER
+            self.doCharge = solarExcess > (CHARGER_MAX_POWER + CHARGER_STAY_ON_HEADROOM)
 
         print(f'Solar: {solar}W  Usage: {usage}W  Charging: {self.charging}  Charge now: {self.doCharge}')
 
