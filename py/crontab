@@ -1,3 +1,5 @@
 # Need these to run on 30-sec boundaries, keep commands in sync.
 * * * * *             python3 ~/src/solarbattman/py/solarbattman.py
+* * * * * ( sleep 15; python3 ~/src/solarbattman/py/solarbattman.py )
 * * * * * ( sleep 30; python3 ~/src/solarbattman/py/solarbattman.py )
+* * * * * ( sleep 45; python3 ~/src/solarbattman/py/solarbattman.py )
