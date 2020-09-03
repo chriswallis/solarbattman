@@ -26,7 +26,7 @@ except ModuleNotFoundError as e:
     print(e)
 
 CHARGER_MAX_POWER = 650
-CHARGER_STAY_ON_HEADROOM = 0
+CHARGER_STAY_ON_HEADROOM = 50
 SCRIPT_RUNNING_PIN = 18
 CHARGER_CONTROL_PIN = 11
 ERROR = -1
@@ -72,6 +72,6 @@ class GpioOutput(Output):
         
         logging.debug(',%s,%s,%s,%s', solar, usage, 1 if self.charging else 0, 1 if self.doCharge else 0)
 
-        sleep(5)
+        sleep(1)
         GPIO.output(SCRIPT_RUNNING_PIN, GPIO.LOW)
 
