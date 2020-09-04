@@ -15,11 +15,11 @@ try:
     with urlopen(MONITOR_URL) as response:
         sensorJson = response.read()
 
-    print(sensorJson)
+#    print(sensorJson)
     feeds = json.loads(sensorJson)
 
     for f in feeds:
-        print(f)
+#        print(f)
         if f["name"] == "solar":
             solarNow = f["value"]
         elif f["name"] == "use":
