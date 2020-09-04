@@ -42,24 +42,35 @@ class Output:
 
     def set_sensor_values(self, solar, usage):
 
+        solar = 3701
+        usage = 1000
+
         # Find out whether the charge pin is already high (ON)
         self.charging = GPIO.input(CHARGER_CONTROL_PIN) == GPIO.HIGH
         self.evCharging = GPIO.input(EV_CONTROL_PIN) == GPIO.HIGH
   
         # Calculate current solar excess
         solarExcess = solar - usage
+        
+        realSolarExcess = solarExcess
+        if self.evCharging:
+            realSolarExcess += EV_MAX_POWER
 
+        if self.charging:
+            realSolarExcess += CHARGER_MAX_POWER
+
+        # Something went wrong getting power values - continue as was
         if solar == ERROR or usage == ERROR:
-            self.doCharge = self.charging
             self.doEvCharge = self.evCharging
-        elif self.charging:
-            self.doCharge = solarExcess > USAGE_HEADROOM
-            self.doEvCharge = 0
-        else: 
-            self.doCharge = solarExcess > (CHARGER_MAX_POWER + USAGE_HEADROOM)
-            self.doEvCharge = 0
+            self.doCharge = self.charging
+        else:
+            self.doEvCharge = realSolarExcess > (EV_MAX_POWER + USAGE_HEADROOM)
+            if self.doEvCharge:
+                self.doCharge = realSolarExcess > (EV_MAX_POWER + CHARGER_MAX_POWER + USAGE_HEADROOM)
+            else:
+                self.doCharge = realSolarExcess > (CHARGER_MAX_POWER + USAGE_HEADROOM)
 
-        print(f'Solar: {solar}W  Usage: {usage}W  Charging: {self.charging}  Charge now: {self.doCharge}')
+        print(f'Solar: {solar}W  Usage: {usage}W  EV Charging: {self.evCharging}  Do EV Charge: {self.doEvCharge} Charging: {self.charging}  Do charge: {self.doCharge}')
 
 
 class GpioOutput(Output):
@@ -77,8 +88,8 @@ class GpioOutput(Output):
     def set_sensor_values(self, solar, usage):
         super().set_sensor_values(solar, usage)
 
-        GPIO.output(CHARGER_CONTROL_PIN, GPIO.HIGH if self.doCharge else GPIO.LOW)
-        GPIO.output(EV_CONTROL_PIN, GPIO.HIGH if self.doEvCharge else GPIO.LOW)
+        #GPIO.output(CHARGER_CONTROL_PIN, GPIO.HIGH if self.doCharge else GPIO.LOW)
+        #GPIO.output(EV_CONTROL_PIN, GPIO.HIGH if self.doEvCharge else GPIO.LOW)
 
         logging.debug(',%s,%s,%s,%s,%s,%s', solar, usage, 1 if self.charging else 0, 1 if self.doCharge else 0, 1 if self.evCharging else 0, 1 if self.doEvCharge else 0)
 
