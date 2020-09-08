@@ -29,7 +29,7 @@ SCRIPT_RUNNING_PIN = 18
 EV_CONTROL_PIN = 13
 BT_CONTROL_PIN = 11
 
-EV_MAX_POWER = 2200
+EV_MAX_POWER = 2350
 BT_MAX_POWER = 650
 USAGE_HEADROOM = 50
 
@@ -56,7 +56,7 @@ class Output:
         # Something went wrong getting power values - continue as was
         if solar == ERROR or usage == ERROR:
             self.doEvCharge = self.evCharging
-            self.doBtCharge = self.btCharging
+            self.doBtCharge = 0
 
         # Nothing is charging
         elif not self.evCharging and not self.btCharging:
@@ -69,23 +69,19 @@ class Output:
         # Battery is charging
         elif not self.evCharging and self.btCharging:
             self.doEvCharge = (solarExcess + BT_MAX_POWER) > evPowerRequired
-            if self.doEvCharge:
-               self.doBtCharge = (solarExcess + BT_MAX_POWER) > allInPowerRequired
-            else:
-               self.doBtCharge = solarExcess > USAGE_HEADROOM
+            self.doBtCharge = 1 if self.doEvCharge else solarExcess > USAGE_HEADROOM
 
         # EV is charging
         elif self.evCharging and not self.btCharging:
+            # If we're switching off EV, switch on BT
             self.doEvCharge = solarExcess > USAGE_HEADROOM
-            self.doBtCharge = solarExcess > btPowerRequired
+            self.doBtCharge = 1 if not self.doEvCharge else (solarExcess > btPowerRequired)
 
         # EV is charging and battery is charging
         elif self.evCharging and self.btCharging:
-            self.doEvCharge = solarExcess > USAGE_HEADROOM
-            if self.doEvCharge:
-               self.doBtCharge = solarExcess > USAGE_HEADROOM
-            else:
-               self.doBtCharge = (solarExcess + BT_MAX_POWER) > btPowerRequired
+            # Only check batt charge.  Switch this off first
+            self.doBtCharge = solarExcess > USAGE_HEADROOM
+            self.doEvCharge = 1
 
         print(f'Solar: {solar}W  Usage: {usage}W  EV Charging: {self.evCharging}  Do EV Charge: {self.doEvCharge} Charging: {self.btCharging}  Do charge: {self.doBtCharge}')
 
