@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+from datetime import datetime, time
 
 try:
     import RPi.GPIO as GPIO
@@ -29,9 +30,12 @@ SCRIPT_RUNNING_PIN = 18
 EV_CONTROL_PIN = 13
 BT_CONTROL_PIN = 11
 
+NIGHT_ON_FROM = '00:30:00'
+NIGHT_ON_TO = '04:30:00'
+
 EV_MAX_POWER = 2350
 BT_MAX_POWER = 650
-USAGE_HEADROOM = 50
+USAGE_HEADROOM = -250
 
 ERROR = -1
 
@@ -40,7 +44,17 @@ class Output:
     def __init__(self, name):
         self.name = name
 
+
     def set_sensor_values(self, solar, usage):
+        
+        def time_is_between(startIsoTime, endIsoTime):
+            now = datetime.now().time()
+            start = time.fromisoformat(startIsoTime)
+            end = time.fromisoformat(endIsoTime)
+            if start <= end:
+                return start <= now < end
+            else: # over midnight e.g., 23:30-04:15
+                return start <= now or now < end
 
         # Find out whether the charge pin is already high (ON)
         self.evCharging = GPIO.input(EV_CONTROL_PIN) == GPIO.HIGH 
@@ -53,8 +67,12 @@ class Output:
         # Calculate current solar excess
         solarExcess = solar - usage
 
+        if time_is_between(NIGHT_ON_FROM, NIGHT_ON_TO):
+            self.doEvCharge = 1
+            self.doBtCharge = 1
+
         # Something went wrong getting power values - continue as was
-        if solar == ERROR or usage == ERROR:
+        elif solar == ERROR or usage == ERROR:
             self.doEvCharge = self.evCharging
             self.doBtCharge = 0
 
