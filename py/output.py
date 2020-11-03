@@ -35,7 +35,9 @@ NIGHT_ON_TO = '04:30:00'
 
 EV_MAX_POWER = 2350
 BT_MAX_POWER = 650
-USAGE_HEADROOM = -250
+
+BT_USAGE_HEADROOM = 50
+EV_USAGE_HEADROOM = 5
 
 ERROR = -1
 
@@ -60,9 +62,9 @@ class Output:
         self.evCharging = GPIO.input(EV_CONTROL_PIN) == GPIO.HIGH 
         self.btCharging = GPIO.input(BT_CONTROL_PIN) == GPIO.HIGH
         
-        evPowerRequired = EV_MAX_POWER + USAGE_HEADROOM
-        btPowerRequired = BT_MAX_POWER + USAGE_HEADROOM
-        allInPowerRequired = EV_MAX_POWER + BT_MAX_POWER + USAGE_HEADROOM
+        evPowerRequired = EV_MAX_POWER + EV_USAGE_HEADROOM
+        btPowerRequired = BT_MAX_POWER + BT_USAGE_HEADROOM
+        allInPowerRequired = EV_MAX_POWER + BT_MAX_POWER + BT_USAGE_HEADROOM
 
         # Calculate current solar excess
         solarExcess = solar - usage
@@ -87,18 +89,18 @@ class Output:
         # Battery is charging
         elif not self.evCharging and self.btCharging:
             self.doEvCharge = (solarExcess + BT_MAX_POWER) > evPowerRequired
-            self.doBtCharge = 1 if self.doEvCharge else solarExcess > USAGE_HEADROOM
+            self.doBtCharge = 1 if self.doEvCharge else solarExcess > BT_USAGE_HEADROOM
 
         # EV is charging
         elif self.evCharging and not self.btCharging:
             # If we're switching off EV, switch on BT
-            self.doEvCharge = solarExcess > USAGE_HEADROOM
+            self.doEvCharge = solarExcess > EV_USAGE_HEADROOM
             self.doBtCharge = 1 if not self.doEvCharge else (solarExcess > btPowerRequired)
 
         # EV is charging and battery is charging
         elif self.evCharging and self.btCharging:
             # Only check batt charge.  Switch this off first
-            self.doBtCharge = solarExcess > USAGE_HEADROOM
+            self.doBtCharge = solarExcess > BT_USAGE_HEADROOM
             self.doEvCharge = 1
 
         print(f'Solar: {solar}W  Usage: {usage}W  EV Charging: {self.evCharging}  Do EV Charge: {self.doEvCharge} Charging: {self.btCharging}  Do charge: {self.doBtCharge}')
