@@ -26,18 +26,24 @@ except ModuleNotFoundError as e:
     GPIO = GPIO_class()
     print(e)
 
-SCRIPT_RUNNING_PIN = 18
-EV_CONTROL_PIN = 13
-BT_CONTROL_PIN = 11
+INVERTER_IS_ON = 1
 
-NIGHT_ON_FROM = '00:30:00'
-NIGHT_ON_TO = '04:30:00'
+if INVERTER_IS_ON:
+    BT_USAGE_HEADROOM = 50
+    EV_USAGE_HEADROOM = 5
+else:
+    BT_USAGE_HEADROOM = -150
+    EV_USAGE_HEADROOM = -500
 
 EV_MAX_POWER = 2350
 BT_MAX_POWER = 650
 
-BT_USAGE_HEADROOM = 50
-EV_USAGE_HEADROOM = 5
+NIGHT_ON_AT = '00:30:00'
+NIGHT_OFF_AT = '04:30:00'
+
+SCRIPT_RUNNING_PIN = 18
+EV_CONTROL_PIN = 13
+BT_CONTROL_PIN = 11
 
 ERROR = -1
 
@@ -69,7 +75,7 @@ class Output:
         # Calculate current solar excess
         solarExcess = solar - usage
 
-        if time_is_between(NIGHT_ON_FROM, NIGHT_ON_TO):
+        if time_is_between(NIGHT_ON_AT, NIGHT_OFF_AT):
             self.doEvCharge = 1
             self.doBtCharge = 1
 
