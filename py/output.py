@@ -26,14 +26,14 @@ except ModuleNotFoundError as e:
     GPIO = GPIO_class()
     print(e)
 
-INVERTER_IS_ON = 1
+INVERTER_IS_ON = 0
 
 if INVERTER_IS_ON:
     BT_USAGE_HEADROOM = 50
     EV_USAGE_HEADROOM = 5
 else:
-    BT_USAGE_HEADROOM = -150
-    EV_USAGE_HEADROOM = -500
+    BT_USAGE_HEADROOM = -200
+    EV_USAGE_HEADROOM = -1000
 
 EV_MAX_POWER = 2350
 BT_MAX_POWER = 650
