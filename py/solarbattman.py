@@ -4,7 +4,7 @@ import json
 from time import sleep 
 from urllib.request import urlopen
 
-MONITOR_URL = "http://192.168.86.107/feed/list.json?apikey=8c91f09904345ca35bcb84bac461980b"
+MONITOR_URL = "http://192.168.86.100/feed/list.json?apikey=8c91f09904345ca35bcb84bac461980b"
 
 logging.basicConfig(filename='output.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
